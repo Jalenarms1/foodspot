@@ -1,9 +1,10 @@
 import smtplib
 from email.message import EmailMessage
+import os
 
 def send_html_verification_email(to_email, code):
     sender_email = "dev.test.jalen@gmail.com"
-    sender_password = "lfwjnxfsqkzxgozc"
+    sender_password = os.getenv("APP_PASS")
 
     msg = EmailMessage()
     msg['Subject'] = 'Your Verification Code'
