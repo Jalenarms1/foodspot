@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:foodspot/extensions/text_extensions.dart';
+import 'package:foodspot/managers/auth_notifier.dart';
 import 'package:foodspot/ui/colors.dart';
 import 'package:foodspot/ui/screens/auth/create_acct_page.dart';
 import 'package:foodspot/ui/screens/auth/signin_page.dart';
+import 'package:provider/provider.dart';
 
 class AuthPage extends StatelessWidget {
   const AuthPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authNotifier = Provider.of<AuthNotifier>(context, listen: false);
+
     // TODO: implement build
     return Center(
       child: Stack(
@@ -93,7 +97,7 @@ class AuthPage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (BuildContext context) => SigninPage(),
+                                builder: (BuildContext context) => SignInPage(),
                               ),
                             );
                           },
@@ -128,7 +132,9 @@ class AuthPage extends StatelessWidget {
                     ],
                   ),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      authNotifier.continueAsGuest();
+                    },
                     child: Text(
                       "Continue as guest",
                     ).appFontStyle(color: AppColors.darkRed, size: 14),

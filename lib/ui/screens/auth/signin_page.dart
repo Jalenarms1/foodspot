@@ -1,10 +1,70 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:foodspot/extensions/text_extensions.dart';
+import 'package:foodspot/managers/network_manager.dart';
 import 'package:foodspot/ui/colors.dart';
+import 'package:foodspot/ui/screens/auth/verify_code_page.dart';
 import 'package:foodspot/ui/shared/app_button.dart';
 
-class SigninPage extends StatelessWidget {
-  const SigninPage({super.key});
+class SignInPage extends StatefulWidget {
+  const SignInPage({super.key});
+
+  @override
+  State<SignInPage> createState() => _SignInPageState();
+}
+
+class _SignInPageState extends State<SignInPage> {
+  TextEditingController _email = TextEditingController();
+  String? _authErr;
+
+  void getVerificationCode(BuildContext ctx) async {
+    final email = _email.text;
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    print(email);
+
+    if (email.isEmpty || !emailRegex.hasMatch(email)) {
+      setState(() {
+        _authErr = "please enter a valid email";
+      });
+
+      return;
+    }
+
+    setState(() {
+      _authErr = null;
+    });
+    final resp = await NetworkManager.post(
+      "/api/users/login",
+      <String, dynamic>{"email": email},
+    );
+
+    if (resp.statusCode != 200) {
+      setState(() {
+        _authErr = resp.body;
+      });
+      return;
+    }
+
+    try {
+      final respJson = jsonDecode(resp.body);
+      final verificationId = respJson["verification_id"];
+
+      Navigator.push(
+        ctx,
+        MaterialPageRoute(
+          builder: (context) {
+            return VerifyCodePage(
+              verificationId: verificationId,
+              userEmail: email,
+            );
+          },
+        ),
+      );
+    } on FormatException catch (e) {
+      print(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,9 +114,7 @@ class SigninPage extends StatelessWidget {
                       spacing: 20,
                       children: [
                         TextField(
-                          onChanged: (value) {
-                            // print(value);
-                          },
+                          controller: _email,
                           decoration: InputDecoration(
                             labelText: "ENTER YOUR EMAIL",
                             labelStyle: TextStyle(
@@ -75,8 +133,16 @@ class SigninPage extends StatelessWidget {
                             ),
                           ),
                         ),
+                        if (_authErr != null)
+                          Text(_authErr!).appFontStyle(
+                            color: Colors.red,
+                            size: 12,
+                            textAlign: TextAlign.start,
+                          ),
                         AppButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            getVerificationCode(context);
+                          },
                           bgColor: AppColors.darkRed,
                           label: Text("Confirm").appFontStyle(
                             size: 16,
