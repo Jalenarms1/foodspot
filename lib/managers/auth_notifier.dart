@@ -13,7 +13,7 @@ class AuthNotifier extends ChangeNotifier {
   AuthNotifier() {
     print("hello");
     getUser();
-    // LocalAuth.removeToken();
+    LocalAuth.removeToken();
   }
 
   Future<void> getUser() async {

@@ -57,6 +57,7 @@ insert into UserVerification (id, userId, code, expires_at) values (?,?,?, ?)
 
         # conn.commit()
     except Exception as e:
+        cursor.close()
         print(e)
         return None
 

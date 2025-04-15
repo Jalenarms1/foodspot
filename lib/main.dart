@@ -21,6 +21,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => AuthNotifier(),
       child: MaterialApp(
+        theme: ThemeData(splashColor: Colors.transparent),
         home: const MyHomePage(title: 'Flutter Demo Home Page'),
       ),
     );
