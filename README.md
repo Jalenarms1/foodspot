@@ -22,4 +22,9 @@ samples, guidance on mobile development, and a full API reference.
 <img src="assets/screenshots/menu-list.png" width="300" height="auto" />
 <img src="assets/screenshots/menu-item-screen1.png" width="300" height="auto" />
 <img src="assets/screenshots/menu-item-screen2.png" width="300" height="auto" />
+<img src="assets/screenshots/new-menu-screen-20250416.png" width="300" height="auto" />
+<img src="assets/screenshots/new-item-screen-img-20250416.png" width="300" height="auto" />
+<img src="assets/screenshots/review-order-modal.png" width="300" height="auto" />
+<img src="assets/screenshots/cart-badge-display.png" width="300" height="auto" />
+
 

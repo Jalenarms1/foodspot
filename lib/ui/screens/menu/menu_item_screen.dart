@@ -1,10 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:foodspot/extensions/padding_ext.dart';
 import 'package:foodspot/extensions/text_extensions.dart';
+import 'package:foodspot/managers/cart_notifier.dart';
 import 'package:foodspot/models/menu_item.dart';
 import 'package:foodspot/models/order_item.dart';
 import 'package:foodspot/shop_data.dart';
 import 'package:foodspot/ui/colors.dart';
+import 'package:foodspot/ui/shared/app_button.dart';
+import 'package:provider/provider.dart';
 
 class MenuItemScreen extends StatefulWidget {
   final MenuItem menuItem;
@@ -36,6 +40,14 @@ class _MenuItemScreenState extends State<MenuItemScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cartNotifier = Provider.of<CartNotifier>(context, listen: false);
+
+    void addToCart() {
+      _orderItem.specialInstructions = _specialInstrctions.text;
+
+      cartNotifier.addToCart(_orderItem);
+    }
+
     return Scaffold(
       body: Stack(
         children: [
@@ -46,7 +58,7 @@ class _MenuItemScreenState extends State<MenuItemScreen> {
                 children: [
                   SizedBox(
                     width: double.infinity,
-                    height: 375,
+                    height: kIsWeb ? 250 : 300,
                     child: Container(
                       decoration: BoxDecoration(
                         boxShadow: [
@@ -64,7 +76,7 @@ class _MenuItemScreenState extends State<MenuItemScreen> {
                     ),
                   ),
                   Positioned(
-                    top: 60,
+                    top: kIsWeb ? 25 : 50,
                     left: 20,
                     child: GestureDetector(
                       onTap: () {
@@ -359,7 +371,218 @@ class _MenuItemScreenState extends State<MenuItemScreen> {
                     child: FloatingActionButton.extended(
                       heroTag: "ato",
                       backgroundColor: AppColors.darkRed,
-                      onPressed: () {},
+                      onPressed: () {
+                        addToCart();
+                        print(cartNotifier.numOfItems);
+                        // Navigator.pop(context);
+                        showModalBottomSheet(
+                          constraints: BoxConstraints(
+                            maxHeight:
+                                MediaQuery.of(context).size.height *
+                                (kIsWeb ? .9 : .75),
+                          ),
+                          isScrollControlled: true,
+                          context: context,
+                          builder: (context) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(50.0),
+                                  topRight: Radius.circular(50.0),
+                                ),
+                              ),
+                              padding: EdgeInsets.all(20.0),
+                              height: MediaQuery.of(context).size.height,
+                              width: double.infinity,
+                              child: Column(
+                                spacing: 20,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text("Done!").appFontStyle(
+                                        color: AppColors.darkRed,
+                                        size: 24,
+                                        weight: FontWeight.w600,
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          Navigator.of(
+                                            context,
+                                          ).popUntil((route) => route.isFirst);
+                                        },
+                                        icon: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.withValues(
+                                              alpha: 0.45,
+                                            ),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          width: 30,
+                                          height: 30,
+                                          child: Icon(
+                                            Icons.close_rounded,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
+                                    "New item added to your order",
+                                  ).appFontStyle(
+                                    color: Colors.grey,
+                                    size: 14,
+                                    weight: FontWeight.w600,
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.all(10.0),
+                                    // height: 100,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.grey),
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Row(
+                                          spacing: 5,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(5.0),
+                                              child: Image.asset(
+                                                widget.menuItem.imagePath,
+                                                width: 75,
+                                                height: 75,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  widget.menuItem.label,
+                                                ).appFontStyle(
+                                                  weight: FontWeight.w600,
+                                                  size: 14,
+                                                ),
+                                                Text(
+                                                  "Qty: ${_orderItem.quantity}",
+                                                ).appFontStyle(
+                                                  color: Colors.grey,
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        Text(
+                                          "\$ ${(_orderItem.quantity * _orderItem.menuItem.price).toStringAsFixed(2)}",
+                                        ).appFontStyle(size: 16),
+                                      ],
+                                    ),
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Meat",
+                                      ).appFontStyle(weight: FontWeight.bold),
+                                      Text(
+                                        _orderItem.selectedMeats.join(", "),
+                                      ).appFontStyle(
+                                        size: 14,
+                                        color: Colors.grey,
+                                      ),
+                                    ],
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Toppings",
+                                      ).appFontStyle(weight: FontWeight.bold),
+                                      Text(
+                                        _orderItem.selectedToppings.join(", "),
+                                      ).appFontStyle(
+                                        size: 14,
+                                        color: Colors.grey,
+                                      ),
+                                    ],
+                                  ),
+                                  if (_orderItem.specialInstructions.isNotEmpty)
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Special Instructions",
+                                        ).appFontStyle(weight: FontWeight.bold),
+                                        Text(
+                                          _orderItem.specialInstructions,
+                                        ).appFontStyle(
+                                          size: 14,
+                                          color: Colors.grey,
+                                        ),
+                                      ],
+                                    ),
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      spacing: 20,
+                                      children: [
+                                        AppButton(
+                                          onPressed: () {},
+                                          label: Text(
+                                            "Review order",
+                                          ).appFontStyle(
+                                            color: Colors.white,
+                                            size: 14,
+                                            weight: FontWeight.w600,
+                                          ),
+                                          bgColor: AppColors.darkRed,
+                                        ),
+                                        AppButton(
+                                          onPressed: () {
+                                            Navigator.of(context).popUntil(
+                                              (route) => route.isFirst,
+                                            );
+                                          },
+                                          label: Text("Continue").appFontStyle(
+                                            color: AppColors.darkRed,
+                                            size: 14,
+                                            weight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ).padding(
+                                      edgeInsets: EdgeInsets.only(
+                                        top: 20,
+                                        bottom: 25,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ).then((v) {
+                          Navigator.of(
+                            context,
+                          ).popUntil((route) => route.isFirst);
+                        });
+                      },
                       label: Text(
                         "Add to order: (${_orderItem.quantity}) \$${(widget.menuItem.price * _orderItem.quantity).toStringAsFixed(2)}",
                       ).appFontStyle(
@@ -371,7 +594,11 @@ class _MenuItemScreenState extends State<MenuItemScreen> {
                   ),
                 ],
               ).padding(
-                edgeInsets: EdgeInsets.only(bottom: 30.0, left: 15, right: 15),
+                edgeInsets: EdgeInsets.only(
+                  bottom: kIsWeb ? 15.0 : 30.0,
+                  left: 15,
+                  right: 15,
+                ),
               ),
             ],
           ),
